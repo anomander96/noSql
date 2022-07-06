@@ -10,6 +10,7 @@ import com.anomander.noSql.task1.service.TicketService;
 import com.anomander.noSql.task1.service.UserAccountService;
 import com.anomander.noSql.task1.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,18 +18,17 @@ import java.util.List;
 @Service
 @Slf4j
 public class TicketServiceImpl implements TicketService {
+    @Autowired
+    TicketRepository myTicketRepository;
 
-    private final TicketRepository ticketRepository;
-    private final UserService userService;
-    private final EventService eventService;
-    private final UserAccountService userAccountService;
+    @Autowired
+    UserService userService;
 
-    public TicketServiceImpl(TicketRepository ticketRepository, UserService userService, EventService eventService, UserAccountService userAccountService) {
-        this.ticketRepository = ticketRepository;
-        this.userService = userService;
-        this.eventService = eventService;
-        this.userAccountService = userAccountService;
-    }
+    @Autowired
+    EventService eventService;
+
+    @Autowired
+    UserAccountService userAccountService;
 
     @Override
     public Ticket bookTicket(long userId, long eventId, int place, Category category) {
@@ -41,30 +41,30 @@ public class TicketServiceImpl implements TicketService {
         userAccountService.withdrawMoneyFromAccount(userId, eventById.getTicketPrice());
 
         Ticket ticket = new Ticket(eventId, userId, category, place);
-        return ticketRepository.save(ticket);
+        return myTicketRepository.save(ticket);
     }
 
     @Override
     public List<Ticket> getBookedTickets(User user) {
         log.info("getBookedTickets by user " + user);
-        return ticketRepository.findAllByUserId(user.getId());
+        return myTicketRepository.findAllByUserId(user.getId());
     }
 
     @Override
     public List<Ticket> getBookedTickets(Event event) {
         log.info("getBookedTickets by event " + event);
-        return ticketRepository.findAllByEventId(event.getId());
+        return myTicketRepository.findAllByEventId(event.getId());
     }
 
     @Override
     public void cancelTicket(long ticketId) {
         log.info("deleting ticket by id " + ticketId);
-        ticketRepository.deleteById(ticketId);
+        myTicketRepository.deleteById(ticketId);
     }
 
     @Override
     public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
+        return myTicketRepository.findAll();
     }
 
 }

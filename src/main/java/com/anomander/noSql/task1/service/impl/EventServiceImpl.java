@@ -4,6 +4,7 @@ import com.anomander.noSql.task1.exception.EventNotFoundException;
 import com.anomander.noSql.task1.repository.EventRepository;
 import com.anomander.noSql.task1.service.EventService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.anomander.noSql.task1.model.Event;
 
@@ -18,24 +19,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EventServiceImpl implements EventService {
 
-    private final EventRepository eventRepository;
-
-    public EventServiceImpl(EventRepository eventRepository) {
-        this.eventRepository = eventRepository;
-    }
+    @Autowired
+    EventRepository myEventRepository;
 
     @Override
     public Event getById(long id) {
         log.info("getting event by id " + id);
 
-        return eventRepository.findById(id)
+        return myEventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException("Event not found by id " + id));
     }
 
     @Override
     public List<Event> getEventsByTitle(String title) {
         log.info("getting events by title " + title);
-        return eventRepository.findAllByTitle(title);
+        return myEventRepository.findAllByTitle(title);
     }
 
     @Override
@@ -43,7 +41,7 @@ public class EventServiceImpl implements EventService {
         log.info("getting event by day " + day);
         int dayOfWeekFromDate = getDayOfWeekFromDate(day);
 
-        return eventRepository.findAll()
+        return myEventRepository.findAll()
                 .stream()
                 .filter(event -> getDayOfWeekFromDate(event.getDate()) == dayOfWeekFromDate)
                 .sorted(Comparator.comparing(Event::getId))
@@ -59,7 +57,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event createEvent(Event event) {
         log.info("creating event:  " + event);
-        return eventRepository.save(event);
+        return myEventRepository.save(event);
     }
 
     @Transactional
@@ -73,18 +71,18 @@ public class EventServiceImpl implements EventService {
     }
 
     private Event getEventById(long eventId) {
-        return eventRepository.findById(eventId)
+        return myEventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("such event id " + eventId + " doesn't exists"));
     }
 
     @Override
     public void deleteEvent(long eventId) {
         log.info("deleting event by id " + eventId);
-        eventRepository.deleteById(eventId);
+        myEventRepository.deleteById(eventId);
     }
 
     @Override
     public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+        return myEventRepository.findAll();
     }
 }
