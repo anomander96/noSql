@@ -1,0 +1,22 @@
+// FOR DOCKER
+// STARTING 4 nodes
+docker run --name node-1 -e CASSANDRA_SEEDS=172.17.0.2 cassandra:latest
+docker run --name node-2 -e CASSANDRA_SEEDS=172.17.0.2 cassandra:latest
+docker run --name node-3 -e CASSANDRA_SEEDS=172.17.0.2 cassandra:latest
+docker run --name node-4 -e CASSANDRA_SEEDS=172.17.0.2 cassandra:latest
+
+// FOR cql script file
+
+DESCRIBE KEYSPACES
+DESCRIBE KEYSPACE cassandra-task3
+
+CREATE KEYSPACE cassandra-task3 IF NOT EXISTS WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true;
+
+USE cassandra-task3;
+
+create TABLE logs (log_level text, timestamp bigint, message text, PRIMARY KEY (log_level, timestamp));
+
+docker run --rm --network cassandra -v "$(pwd)/Downloads/cassandra-data/data.cql" -e CQLSH_HOST=cassandra -e CQLSH_PORT=9042 -e CQLVERSION=3.4.5 nuvo/docker-cqlsh
+
+docker exec -i cassandra_1 cqlsh -f /Users/anomander/Downloads/cassandra-data/data.cql
+docker run -it nuvo/docker-cqlsh bash
